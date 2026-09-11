@@ -1088,13 +1088,15 @@ fun MacroPadEditor(
                                         ) {
                                             ChooseButtonTypeSubPageContent(
                                                 onSelectType = { group ->
-                                                    if (group == ActionGroup.MACRO && PrivdManager.state.value != PrivdState.RUNNING) {
+                                                    if ((group == ActionGroup.MACRO || group == ActionGroup.GAMEPAD) &&
+                                                        PrivdManager.state.value != PrivdState.RUNNING
+                                                    ) {
                                                         DialogToastManager.show(context.getString(R.string.privd_error_daemon_unreachable))
                                                         return@ChooseButtonTypeSubPageContent
                                                     }
                                                     val hasMacros = profile.macros.isNotEmpty()
                                                     val defaultCategory =
-                                                        group.actions().firstOrNull { it.isEnabled(true, true, true, hasMacros) }
+                                                        group.actions().firstOrNull { it.isAvailable(hasMacros) }
                                                             ?: group.actions().first()
                                                     val defaultAction = defaultCategory.defaultAction()
                                                     val newDraft =
@@ -1712,6 +1714,7 @@ fun MacroPadEditor(
                                                 accentColor = colors.accent,
                                                 onSelectAction = { act ->
                                                     val updatedDraft = applyActionToDraftButton(effectiveButton, act)
+                                                    buttonDraft = updatedDraft
                                                     MacroPadNavState.setStack(
                                                         subPageStack.dropLast(1).map { subPage ->
                                                             if (subPage is MacroPadSubPage.EditButton) {
